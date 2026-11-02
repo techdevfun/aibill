@@ -1,0 +1,78 @@
+$ aibill scan examples/session-before.jsonl
+Format: claude-code (1 file(s))
+
+TOOL                   CALLS   MEAN TOK   P95 TOK   TOTAL TOK       USD*
+------------------------------------------------------------------------
+mcp__doc_lookup           30     23,265    26,947     697,938     $16.55
+mcp__codebase_search      24     15,427    18,889     370,241      $7.81
+Read                      40      5,020     7,247     200,797      $3.94
+mcp__oneoff_export         1     52,000    52,000      52,000      $1.26
+Bash                      24      2,528     3,385      60,667      $1.23
+Grep                      12      2,161     2,812      25,932      $0.57
+Glob                       6      2,939     3,156      17,633      $0.32
+
+Total: 137 calls, 1,425,208 tokens, $31.68* estimated
+
+By framework surface (top 8):
+  src/auth: 9 calls, 48,570 tokens
+  src/shop: 7 calls, 42,742 tokens
+  src/db: 7 calls, 32,961 tokens
+  (root): 12 calls, 25,932 tokens
+  src/web: 5 calls, 23,437 tokens
+  docs: 4 calls, 18,107 tokens
+  src/api: 4 calls, 17,748 tokens
+  tests: 4 calls, 17,232 tokens
+
+* USD estimated from public rate cards verified 2026-11-02; not your invoice.
+  Override with --pricing-file for your contracted rates.
+  (!) 12 call(s) share per-message token counts (split evenly across the message's tool calls).
+[exit 0]
+
+$ aibill cut examples/session-before.jsonl --top 3
+Cut candidates (review before removing anything):
+
+1. [top-spender] mcp__doc_lookup - $16.55 across 30 call(s)
+   largest cost share at $16.55; verify the value justifies it before touching anything else
+2. [duplicates] Read - $3.94 across 13 call(s)
+   13 calls repeated with identical inputs; results could be cached or the prompt tightened
+3. [single-use] mcp__oneoff_export - $1.26 across 1 call(s)
+   used once for 52,000 tokens; check whether the workflow needs it at all
+
+* USD = estimate from public rate cards, not a savings promise.
+[exit 0]
+
+$ aibill cut examples/mcp-sample.jsonl --top 3
+Cut candidates (review before removing anything):
+
+1. [huge-unreferenced] mcp__pdf_extract - $0.27 across 3 call(s)
+   3 call(s) returned >= 8000 output tokens that were never referenced later; scope the query down
+2. [top-spender] mcp__pdf_extract - $0.27 across 3 call(s)
+   largest cost share at $0.27; verify the value justifies it before touching anything else
+3. [duplicates] mcp__web_fetch - $0.06 across 3 call(s)
+   3 calls repeated with identical inputs; results could be cached or the prompt tightened
+
+* USD = estimate from public rate cards, not a savings promise.
+[exit 0]
+
+$ aibill diff --before examples/session-before.jsonl --after examples/session-after.jsonl
+Measured change (before -> after):
+  calls:  137 -> 107
+  tokens: 1,425,208 -> 727,270 (-49.0% measured)
+  USD*:   $31.68 -> $15.12 (-52.3% measured)
+
+Per tool (biggest measured savings first):
+  mcp__doc_lookup: $16.55 -> $0.00 ($-16.55)
+  mcp__codebase_search: $7.81 -> $7.81 ($0.00)
+  Read: $3.94 -> $3.94 ($0.00)
+  mcp__oneoff_export: $1.26 -> $1.26 ($0.00)
+  Bash: $1.23 -> $1.23 ($0.00)
+  Grep: $0.57 -> $0.57 ($0.00)
+  Glob: $0.32 -> $0.32 ($0.00)
+
+* Measured on these two transcripts only. Not a promise of future savings.
+[exit 0]
+
+$ aibill budget --max-usd 20 examples/session-after.jsonl
+Spend $15.12* vs budget $20.00: within budget
+* Estimate from public rate cards, not your invoice.
+[exit 0]

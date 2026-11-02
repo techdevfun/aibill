@@ -1,0 +1,43 @@
+{
+  "author": "techdevfun",
+  "bin": {
+    "aibill": "out/src/cli.js"
+  },
+  "dependencies": {},
+  "description": "Measure where your AI bill actually burns: per-tool, per-model token and USD attribution from real agent session transcripts. 100% local, zero runtime dependencies.",
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "typescript": "5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "out",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "cost",
+    "token",
+    "attribution",
+    "mcp",
+    "claude-code",
+    "cli",
+    "observability"
+  ],
+  "license": "MIT",
+  "name": "aibill-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/techdevfun/aibill.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test out/tests/stats.test.js out/tests/pricing.test.js out/tests/adapters-jsonl.test.js out/tests/adapters-claude.test.js out/tests/detect.test.js out/tests/cut.test.js out/tests/diff-budget.test.js out/tests/scan.test.js out/tests/cli.test.js out/tests/examples.test.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.1.0"
+}

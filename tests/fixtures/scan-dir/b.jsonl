@@ -1,0 +1,1 @@
+{"message":{"content":[{"input":{"file_path":"b.ts"},"name":"Bash","type":"tool_use"}],"model":"claude-opus-4-6","usage":{"input_tokens":1000,"output_tokens":200}},"type":"assistant"}

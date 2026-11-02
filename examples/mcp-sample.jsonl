@@ -1,0 +1,8 @@
+{"tool": "mcp__web_fetch", "model": "gpt-6-1-terra", "input_tokens": 150, "output_tokens": 4200, "output_referenced": true, "input": {"url": "https://example.com/docs/pricing"}}
+{"tool": "mcp__web_fetch", "model": "gpt-6-1-terra", "input_tokens": 150, "output_tokens": 4180, "output_referenced": true, "input": {"url": "https://example.com/docs/pricing"}}
+{"tool": "mcp__web_fetch", "model": "gpt-6-1-terra", "input_tokens": 150, "output_tokens": 4210, "output_referenced": true, "input": {"url": "https://example.com/docs/pricing"}}
+{"tool": "mcp__pdf_extract", "model": "gpt-6-1-terra", "input_tokens": 300, "output_tokens": 18400, "output_referenced": false, "input": {"file": "invoice-batch-03.pdf"}}
+{"tool": "mcp__pdf_extract", "model": "gpt-6-1-terra", "input_tokens": 300, "output_tokens": 15200, "output_referenced": false, "input": {"file": "invoice-batch-04.pdf"}}
+{"tool": "mcp__pdf_extract", "model": "gpt-6-1-terra", "input_tokens": 300, "output_tokens": 21000, "output_referenced": false, "input": {"file": "invoice-batch-05.pdf"}}
+{"tool": "mcp__summarize", "model": "gpt-6-1-terra", "input_tokens": 800, "output_tokens": 320, "output_referenced": true, "input": {"text": "quarterly notes"}}
+{"tool": "mcp__translate", "model": "gpt-6-1-terra", "input_tokens": 500, "output_tokens": 520, "framework_surface": "docs", "input": {"lang": "en"}}
