@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import * as path from "path";
 import { repoRoot } from "./helpers";
-import { loadPricingFile, PRICING, usdFor } from "../src/pricing";
+import { loadPricingFile, PRICING, PRICING_CHECK_DATE, usdFor } from "../src/pricing";
 
 // Fixtures live in tests/fixtures/ (committed): deterministic, no temp files.
 const FX = path.join(repoRoot(), "tests", "fixtures");
@@ -53,5 +53,20 @@ describe("loadPricingFile", () => {
       () => loadPricingFile(path.join(FX, "pricing-badrow.json")),
       /non-negative/,
     );
+  });
+});
+
+describe("pricing freshness", () => {
+  it("default table was verified within the last 90 days", () => {
+    const checkedMs = Date.parse(PRICING_CHECK_DATE + "T00:00:00Z");
+    assert.ok(!Number.isNaN(checkedMs), "PRICING_CHECK_DATE must be an ISO date");
+    const ageDays = (Date.now() - checkedMs) / 86_400_000;
+    assert.ok(
+      ageDays >= 0 && ageDays <= 90,
+      `pricing table is ${ageDays.toFixed(1)} days old; re-verify against provider rate cards and update PRICING_CHECK_DATE`,
+    );
+    for (const [name, row] of Object.entries(PRICING)) {
+      assert.equal(row.checked, PRICING_CHECK_DATE, `row ${name} must carry the verified date`);
+    }
   });
 });

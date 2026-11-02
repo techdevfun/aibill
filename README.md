@@ -7,6 +7,8 @@ tool ate the budget - and verify the cut paid off.
 
 ![demo](examples/demo.gif)
 
+_Demo runs on synthetic seeded fixtures (`scripts/gen-examples.py`) — run `aibill scan` on your own transcripts for real numbers._
+
 ## The problem
 
 You see the bill, not the line items. When a framework feels "heavy" or a usage
@@ -20,7 +22,7 @@ else's workload. aibill measures on yours.
 Four commands, one idea: measure first, cut second, verify third.
 
 ```sh
-npx aibill-cli scan <transcript-or-dir>
+npx -p aibill-cli aibill scan <transcript-or-dir>
 ```
 
 ```
@@ -55,7 +57,7 @@ Requires Node.js 20+. Zero runtime dependencies.
 
 ```sh
 # no install needed:
-npx aibill-cli scan ~/.claude/projects/my-project/*.jsonl
+npx -p aibill-cli aibill scan ~/.claude/projects/my-project/*.jsonl
 ```
 
 ## Inputs
@@ -98,7 +100,7 @@ aibill scan session.jsonl --pricing-file my-rates.json
 ## CI gate example
 
 ```yaml
-- run: npx aibill-cli budget --max-usd 25 ./agent-transcripts/
+- run: npx -p aibill-cli aibill budget --max-usd 25 ./agent-transcripts/
 ```
 
 ## Roadmap
