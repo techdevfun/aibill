@@ -49,6 +49,28 @@ describe("parseArgs", () => {
     assert.throws(() => parseArgs(["node", "aibill", "scan", "x.jsonl", "--bogus"]), /unknown flag/);
   });
 
+  it("rejects flags that belong to another command", () => {
+    assert.throws(
+      () => parseArgs(["node", "aibill", "scan", "x.jsonl", "--max-usd", "25"]),
+      /--max-usd.*does not apply/,
+    );
+    assert.throws(
+      () => parseArgs(["node", "aibill", "budget", "--max-usd", "8", "x.jsonl", "--top", "3"]),
+      /--top.*does not apply/,
+    );
+    assert.throws(
+      () => parseArgs(["node", "aibill", "diff", "--before", "a", "--after", "b", "--max-usd", "1"]),
+      /--max-usd.*does not apply/,
+    );
+  });
+
+  it("rejects a stray positional on diff", () => {
+    assert.throws(
+      () => parseArgs(["node", "aibill", "diff", "--before", "a", "--after", "b", "extra.jsonl"]),
+      /takes no transcript path/,
+    );
+  });
+
   it("routes help and version", () => {
     assert.equal(parseArgs(["node", "aibill"]).command, "help");
     assert.equal(parseArgs(["node", "aibill", "--help"]).command, "help");
