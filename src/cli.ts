@@ -35,6 +35,19 @@ interface ParsedArgs {
   global: GlobalOpts;
 }
 
+/**
+ * Flags that belong to exactly one command. A flag typed next to the wrong
+ * command (e.g. `aibill scan session.jsonl --max-usd 25`) must fail loudly
+ * instead of being silently ignored - a CI gate written that way would pass
+ * no matter what the measured spend was.
+ */
+const COMMAND_FLAGS: Record<string, Array<"scan" | "cut" | "diff" | "budget">> = {
+  "--top": ["cut"],
+  "--before": ["diff"],
+  "--after": ["diff"],
+  "--max-usd": ["budget"],
+};
+
 export function parseArgs(argv: string[]): ParsedArgs {
   const args = argv.slice(2);
   const global: GlobalOpts = { json: false, pricingTable: PRICING };
@@ -54,6 +67,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const command = rawCommand as (typeof KNOWN)[number];
 
   const positional: string[] = [];
+  const seenFlags: string[] = [];
   let top: number | undefined;
   let before: string | undefined;
   let after: string | undefined;
@@ -68,16 +82,20 @@ export function parseArgs(argv: string[]): ParsedArgs {
       if (!p) throw new UsageError("--pricing-file needs a path");
       global.pricingTable = loadPricingFile(p);
     } else if (a === "--top") {
+      seenFlags.push("--top");
       const v = args[++i];
       if (v === undefined || !/^\d+$/.test(v)) throw new UsageError("--top needs a non-negative integer");
       top = parseInt(v, 10);
     } else if (a === "--before") {
+      seenFlags.push("--before");
       before = args[++i];
       if (!before) throw new UsageError("--before needs a path");
     } else if (a === "--after") {
+      seenFlags.push("--after");
       after = args[++i];
       if (!after) throw new UsageError("--after needs a path");
     } else if (a === "--max-usd") {
+      seenFlags.push("--max-usd");
       const v = args[++i];
       if (v === undefined || !/^\d+(\.\d+)?$/.test(v)) throw new UsageError("--max-usd needs a number");
       maxUsd = parseFloat(v);
@@ -88,8 +106,17 @@ export function parseArgs(argv: string[]): ParsedArgs {
     }
   }
 
+  for (const f of seenFlags) {
+    if (!COMMAND_FLAGS[f].includes(command)) {
+      throw new UsageError(`"${f}" does not apply to the "${command}" command. See --help.`);
+    }
+  }
+
   if (command === "diff") {
     if (!before || !after) throw new UsageError("diff needs --before <path> --after <path>");
+    if (positional.length > 0) {
+      throw new UsageError(`diff takes no transcript path; use --before <path> --after <path>`);
+    }
     return { command, before, after, global };
   }
   if (positional.length !== 1) {
