@@ -25,6 +25,39 @@ describe("recommendCut", () => {
     assert.equal(dup.affectedCalls, 2);
   });
 
+  it("prices duplicates at the duplicated calls' cost, not the whole tool's", () => {
+    // 2 cheap duplicated calls ($0.006 each) + 1 huge unrelated call ($6.00):
+    // the signal must report $0.012 across 2 calls, not the $6.012 tool total.
+    const signals = recommendCut(
+      [
+        call({ inputHash: "aa" }),
+        call({ inputHash: "aa" }),
+        call({ inputHash: "bb", inputTokens: 1000000, outputTokens: 1000000 }),
+      ],
+      { topN: 10 },
+    );
+    const dup = signals.find((s) => s.kind === "duplicates");
+    if (!dup) throw new Error("expected a duplicates signal");
+    assert.equal(dup.affectedCalls, 2);
+    assert.ok(Math.abs(dup.usd - 0.012) < 1e-9, `duplicates usd: ${dup.usd}`);
+  });
+
+  it("prices huge-unreferenced calls at their own cost, not the whole tool's", () => {
+    // 1 huge unreferenced call ($0.046) + 1 huge referenced call ($6.00):
+    // the signal must report $0.046 across 1 call, not the $6.046 tool total.
+    const signals = recommendCut(
+      [
+        call({ tool: "Big", outputTokens: 9000, outputReferenced: false }),
+        call({ tool: "Big", inputTokens: 1000000, outputTokens: 1000000, outputReferenced: true }),
+      ],
+      { topN: 10 },
+    );
+    const huge = signals.find((s) => s.kind === "huge-unreferenced");
+    if (!huge) throw new Error("expected a huge-unreferenced signal");
+    assert.equal(huge.affectedCalls, 1);
+    assert.ok(Math.abs(huge.usd - 0.046) < 1e-9, `huge-unreferenced usd: ${huge.usd}`);
+  });
+
   it("flags huge outputs never referenced (and only then)", () => {
     const mk = (ref: boolean | undefined) => [
       call({ tool: "Big", outputTokens: 9000, outputReferenced: ref }),
